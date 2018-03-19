@@ -18,6 +18,20 @@ with tf.variable_scope('right_branch) as src:
 #init the two branch network from the same checkpoint.
 checkpoint_utils.init_from_checkpoint(checkpoint_file,{'/':'left_branch'})
 checkpoint_utils.init_from_checkpoint(checkpoint_file,{'/':'right_branch'})
+# using {'name':var}
+#checkpoint_utils.init_from_checkpoint(checkpoint_file,name_var_pair)
+```
+
+The resotre operation just assign the variable using the value from checkpoint, so a more flexible method to do this is to do assign by ourself as shown bellow:
+```
+def user_restore(sess,checkpoint_file,restore_var):
+    reader = pywrap_tensorflow.NewCheckpointReader(checkpoint_file)
+    assign_vars = []
+    for name in restore_var.keys():
+        value = reader.get_tensor(name)
+        assign_vars.append(tf.assign(restore_var[name],value))
+    assign_group = tf.group(*assign_vars)
+    sess.run(assign_group)
 ```
 
 ##  Graph editor
