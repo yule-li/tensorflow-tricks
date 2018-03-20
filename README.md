@@ -18,6 +18,8 @@ with tf.variable_scope('right_branch) as src:
 #init the two branch network from the same checkpoint.
 checkpoint_utils.init_from_checkpoint(checkpoint_file,{'/':'left_branch'})
 checkpoint_utils.init_from_checkpoint(checkpoint_file,{'/':'right_branch'})
+#should initialize the variable using the value in checkpoint
+tf.global_variables_initializer().run(session=sess)
 # using {'name':var}
 #checkpoint_utils.init_from_checkpoint(checkpoint_file,name_var_pair)
 ```
