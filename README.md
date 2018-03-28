@@ -35,6 +35,25 @@ def user_restore(sess,checkpoint_file,restore_var):
     assign_group = tf.group(*assign_vars)
     sess.run(assign_group)
 ```
+## Variables sharing
+When we want to share variables in different parts of our model, it's easy to implement in tensorflow by following steps:
+```
+import tensorflow.contrib.slim as slim
+from tensorflow.contrib.slim.nets import resnet_v`1
+
+# put your model under variable_scope so that when you get out of the code scope,you will not be disturbed by reuse_varialbes()
+with tf.variable_scope(tf.get_variable_scope()) as var_scope:
+    out_left = resnet_v1.resnet_v1_50(left_images,is_training=True,num_class=256,reuse=False)
+    tf.get_variable_scope().reuse_variables()
+    out_right = resnet_v1.resnet_v1_50(right_images,is_training=True,num_class=256,reuse=True)
+
+... ...
+
+#you will get error when you do not put your model under the var_scope 
+#for the Adam optimizer will create variable by get_variable, but you set variable reuse which can not reset.
+opt = tf.train.Adamoptimizer(learning_rate).minimize(loss)
+
+```
 
 ##  Graph editor
 Tensorflow program includes two phases:1)assemble the graph;2)run the operation defined in graph in session. So the graph is static and we can obtains all informations about the graph and can also modify the graph. For example, given a tensor we can get its parent nodes and children nodes. Further, if needed we can change the link between  a node and b node.
